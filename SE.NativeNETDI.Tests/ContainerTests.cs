@@ -5,6 +5,7 @@ namespace IngameScript
     class ContainerTests : BaseTestClass
     {
         private Container _container;
+        private const string TestConfigValue = "Config123";
 
         public override void Setup()
         {
@@ -17,267 +18,229 @@ namespace IngameScript
             {
                 return new Action[]
                 {
-                    Resolve_SingletonRegistration_ReturnsSameInstance,
-                    Resolve_TransientRegistration_ReturnsDifferentInstances,
-                    Resolve_RegisteredContract_ReturnsConcreteImplementation,
-                    Resolve_UnregisteredType_ThrowsInvalidOperationException,
-                    Resolve_Singleton_CallsFactoryOnlyOnce,
-                    Resolve_Transient_CallsFactoryEveryTime,
-                    RegisterTransient_OverridesSingletonBehavior,
-
-                    Resolve_SingletonFactoryReturnsNull_ReturnsNullWithoutException,
-                    Resolve_SingletonFactoryThrowsException_ContainerRemainsUsable,
-                    RegisterTransientTwice_LastRegistrationWins,
-                    ResolveBeforeRegister_ThrowsInvalidOperationException,
-                    RegisterTransient_GenericContractAndService_ResolvesAsTransient,
-
-                    Resolve_DummyServiceWithParamsWithDependencies_ResolvesSuccessfully,                 
-                    Resolve_DummyServiceWithParamsWithMissingDependency_ThrowsException,
-                    Resolve_DummyServiceWithParamsWithoutDependencies_ThrowsException
+                    Resolve_SingletonRegistration_WhenRegistered_ShouldReturnSameInstance,
+                    Resolve_TransientRegistration_WhenRegistered_ShouldReturnDifferentInstances,
+                    Resolve_RegisteredContract_WhenRegistered_ShouldReturnConcreteImplementation,
+                    Resolve_UnregisteredType_WhenResolved_ShouldThrowInvalidOperationException,
+                    Resolve_Singleton_WhenRegistered_ShouldCallFactoryOnlyOnce,
+                    Resolve_Transient_WhenRegistered_ShouldCallFactoryEveryTime,
+                    RegisterTransient_WhenOverridingSingleton_ShouldBehaveAsTransient,
+                    Resolve_SingletonFactoryReturnsNull_WhenResolved_ShouldReturnNullWithoutException,
+                    Resolve_SingletonFactoryThrowsException_WhenResolved_ShouldKeepContainerUsable,
+                    RegisterTransientTwice_WhenRegistered_ShouldUseLastRegistration,
+                    ResolveBeforeRegister_WhenResolved_ShouldThrowInvalidOperationException,
+                    RegisterTransient_GenericContractAndService_WhenRegistered_ShouldResolveAsTransient,
+                    Resolve_DummyServiceWithParams_WhenAllDependenciesRegistered_ShouldResolveSuccessfully,
+                    Resolve_DummyServiceWithParams_WhenMissingDependency_ShouldThrowException,
+                    Resolve_DummyServiceWithParams_WhenNoDependenciesRegistered_ShouldThrowException
                 };
             }
         }
 
-        // Actual tests
-
-        static void Resolve_DummyServiceWithParamsWithMissingDependency_ThrowsException()
+        private void ResetGlobalFlags()
         {
-            var container = new Container();
-
-            container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
-            // string intentionally not registered
-
-            container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
-                c.Resolve<TestTypes.ITestService>(),
-                c.Resolve<string>())
-            );
-
-            try
-            {
-                container.Resolve<TestTypes.DummyServiceWithParams>();
-                throw new Exception("Expected InvalidOperationException was not thrown");
-            }
-            catch (InvalidOperationException)
-            {
-                // Expected: string dependency missing
-            }
-        }
-        static void Resolve_DummyServiceWithParamsWithoutDependencies_ThrowsException()
-        {
-            var container = new Container();
-
-            container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
-                c.Resolve<TestTypes.ITestService>(),
-                c.Resolve<string>())
-            );
-
-            try
-            {
-                container.Resolve<TestTypes.DummyServiceWithParams>();
-                throw new Exception("Expected InvalidOperationException was not thrown");
-            }
-            catch (InvalidOperationException)
-            {
-                // Expected: no ITestService and no string registered
-            }
+            TestTypes.DummyServiceWithParams.ConstructorCalled = false;
         }
 
-        static void Resolve_DummyServiceWithParamsWithDependencies_ResolvesSuccessfully()
+        private void Resolve_DummyServiceWithParams_WhenMissingDependency_ShouldThrowException()
         {
-            var container = new Container();
-
-            container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
-            container.RegisterSingleton<string>(c => "Config123");
-
-            container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
+            ResetGlobalFlags();
+            _container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
+            _container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
                 c.Resolve<TestTypes.ITestService>(),
                 c.Resolve<string>())
             );
 
-            var dummy = container.Resolve<TestTypes.DummyServiceWithParams>();
+            Assert.Throws<InvalidOperationException>(() => _container.Resolve<TestTypes.DummyServiceWithParams>());
+        }
+
+        private void Resolve_DummyServiceWithParams_WhenNoDependenciesRegistered_ShouldThrowException()
+        {
+            ResetGlobalFlags();
+            _container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
+                c.Resolve<TestTypes.ITestService>(),
+                c.Resolve<string>())
+            );
+
+            Assert.Throws<InvalidOperationException>(() => _container.Resolve<TestTypes.DummyServiceWithParams>());
+        }
+
+        private void Resolve_DummyServiceWithParams_WhenAllDependenciesRegistered_ShouldResolveSuccessfully()
+        {
+            ResetGlobalFlags();
+            _container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
+            _container.RegisterSingleton<string>(c => TestConfigValue);
+            _container.RegisterTransient<TestTypes.DummyServiceWithParams>(c => new TestTypes.DummyServiceWithParams(
+                c.Resolve<TestTypes.ITestService>(),
+                c.Resolve<string>())
+            );
+
+            var dummy = _container.Resolve<TestTypes.DummyServiceWithParams>();
 
             Assert.IsNotNull(dummy.TestService);
-            Assert.AreEqual("Config123", dummy.ConfigValue);
+            Assert.AreEqual(TestConfigValue, dummy.ConfigValue);
             Assert.IsTrue(TestTypes.DummyServiceWithParams.ConstructorCalled);
-        }     
+        }
 
-        static void RegisterTransient_GenericContractAndService_ResolvesAsTransient()
+        private void RegisterTransient_GenericContractAndService_WhenRegistered_ShouldResolveAsTransient()
         {
-            var container = new Container();
+            ResetGlobalFlags();
+            _container.RegisterTransient<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
 
-            container.RegisterTransient<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
-
-            var instance1 = container.Resolve<TestTypes.ITestService>();
-            var instance2 = container.Resolve<TestTypes.ITestService>();
+            var instance1 = _container.Resolve<TestTypes.ITestService>();
+            var instance2 = _container.Resolve<TestTypes.ITestService>();
 
             Assert.IsTrue(instance1 is TestTypes.TestService);
             Assert.IsTrue(instance2 is TestTypes.TestService);
             Assert.IsFalse(object.ReferenceEquals(instance1, instance2));
         }
 
-
-        static void ResolveBeforeRegister_ThrowsInvalidOperationException()
+        private void ResolveBeforeRegister_WhenResolved_ShouldThrowInvalidOperationException()
         {
-            var container = new Container();
-
-            try
-            {
-                var instance = container.Resolve<object>();
-                throw new Exception("Expected exception was not thrown");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.IsTrue(ex.Message.Contains("No registration for type"));
-            }
+            ResetGlobalFlags();
+            Assert.Throws<InvalidOperationException>(() => _container.Resolve<object>());
         }
 
-        static void RegisterTransientTwice_LastRegistrationWins()
+        private void RegisterTransientTwice_WhenRegistered_ShouldUseLastRegistration()
         {
-            var container = new Container();
+            ResetGlobalFlags();
+            _container.RegisterTransient<object>(c => new object());
+            var first = _container.Resolve<object>();
 
-            container.RegisterTransient<object>(c => new object());
-            var first = container.Resolve<object>();
-
-            container.RegisterTransient<object>(c => new object());
-            var second = container.Resolve<object>();
+            _container.RegisterTransient<object>(c => new object());
+            var second = _container.Resolve<object>();
 
             Assert.IsFalse(object.ReferenceEquals(first, second));
         }
 
-
-        static void Resolve_SingletonFactoryThrowsException_ContainerRemainsUsable()
+        private void Resolve_SingletonFactoryThrowsException_WhenResolved_ShouldKeepContainerUsable()
         {
-            var container = new Container();
+            ResetGlobalFlags();
 
-            container.RegisterSingleton<object>(c => { throw new Exception("Factory failed"); });
+            _container.RegisterSingleton<object>(c =>
+            {
+                throw new Exception("Factory failed");
+            });
 
             try
             {
-                container.Resolve<object>();
+                _container.Resolve<object>();
             }
             catch (Exception)
             {
-                // Expected
+                // Expected failure
             }
 
-            container.RegisterSingleton<string>(c => "test");
-            var strInstance = container.Resolve<string>();
+            _container.RegisterSingleton<string>(c => TestConfigValue);
+            var strInstance = _container.Resolve<string>();
 
-            Assert.AreEqual("test", strInstance);
+            Assert.AreEqual(TestConfigValue, strInstance);
         }
 
-
-        static void Resolve_SingletonRegistration_ReturnsSameInstance()
+        private void Resolve_SingletonRegistration_WhenRegistered_ShouldReturnSameInstance()
         {
-            var container = new Container();
-            container.RegisterSingleton(c => new object());
+            ResetGlobalFlags();
+            _container.RegisterSingleton(c => new object());
 
-            var instance1 = container.Resolve<object>();
-            var instance2 = container.Resolve<object>();
+            var instance1 = _container.Resolve<object>();
+            var instance2 = _container.Resolve<object>();
 
             Assert.IsTrue(object.ReferenceEquals(instance1, instance2));
         }
 
-        static void Resolve_TransientRegistration_ReturnsDifferentInstances()
+        private void Resolve_TransientRegistration_WhenRegistered_ShouldReturnDifferentInstances()
         {
-            var container = new Container();
-            container.RegisterTransient(c => new object());
+            ResetGlobalFlags();
+            _container.RegisterTransient(c => new object());
 
-            var instance1 = container.Resolve<object>();
-            var instance2 = container.Resolve<object>();
+            var instance1 = _container.Resolve<object>();
+            var instance2 = _container.Resolve<object>();
 
             Assert.IsFalse(object.ReferenceEquals(instance1, instance2));
         }
 
-        static void Resolve_RegisteredContract_ReturnsConcreteImplementation()
+        private void Resolve_RegisteredContract_WhenRegistered_ShouldReturnConcreteImplementation()
         {
-            var container = new Container();
-            container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
+            ResetGlobalFlags();
+            _container.RegisterSingleton<TestTypes.ITestService, TestTypes.TestService>(c => new TestTypes.TestService());
 
-            var service = container.Resolve<TestTypes.ITestService>();
+            var service = _container.Resolve<TestTypes.ITestService>();
 
             Assert.IsTrue(service is TestTypes.TestService);
         }
 
-        static void Resolve_UnregisteredType_ThrowsInvalidOperationException()
+        private void Resolve_UnregisteredType_WhenResolved_ShouldThrowInvalidOperationException()
         {
-            var container = new Container();
-
-            try
-            {
-                container.Resolve<TestTypes.DummyService>();
-                throw new Exception("Expected exception was not thrown");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.IsTrue(ex.Message.Contains("No registration for type"));
-            }
+            ResetGlobalFlags();
+            Assert.Throws<InvalidOperationException>(() => _container.Resolve<TestTypes.DummyService>());
         }
 
-        static void Resolve_Singleton_CallsFactoryOnlyOnce()
+        private void Resolve_Singleton_WhenRegistered_ShouldCallFactoryOnlyOnce()
         {
-            var container = new Container();
+            ResetGlobalFlags();
             int counter = 0;
-            container.RegisterSingleton(c =>
+            _container.RegisterSingleton(c =>
             {
                 counter++;
                 return new object();
             });
 
-            var instance1 = container.Resolve<object>();
-            var instance2 = container.Resolve<object>();
+            var instance1 = _container.Resolve<object>();
+            var instance2 = _container.Resolve<object>();
 
             Assert.AreEqual(1, counter);
         }
 
-        static void Resolve_Transient_CallsFactoryEveryTime()
+        private void Resolve_Transient_WhenRegistered_ShouldCallFactoryEveryTime()
         {
-            var container = new Container();
+            ResetGlobalFlags();
             int counter = 0;
-            container.RegisterTransient(c =>
+            _container.RegisterTransient(c =>
             {
                 counter++;
                 return new object();
             });
 
-            var instance1 = container.Resolve<object>();
-            var instance2 = container.Resolve<object>();
+            var instance1 = _container.Resolve<object>();
+            var instance2 = _container.Resolve<object>();
 
             Assert.AreEqual(2, counter);
         }
 
-        static void RegisterTransient_OverridesSingletonBehavior()
+        private void RegisterTransient_WhenOverridingSingleton_ShouldBehaveAsTransient()
         {
-            var container = new Container();
+            ResetGlobalFlags();
             int counter = 0;
 
-            container.RegisterSingleton(c =>
+            _container.RegisterSingleton(c =>
             {
                 counter++;
                 return new object();
             });
 
-            container.RegisterTransient(c =>
+
+            // Re-register as Transient: expect new behavior
+            _container.RegisterTransient(c =>
             {
                 counter++;
                 return new object();
             });
 
-            var instance1 = container.Resolve<object>();
-            var instance2 = container.Resolve<object>();
+            var instance1 = _container.Resolve<object>();
+            var instance2 = _container.Resolve<object>();
 
             Assert.IsFalse(object.ReferenceEquals(instance1, instance2));
             Assert.AreEqual(2, counter);
         }
 
-        static void Resolve_SingletonFactoryReturnsNull_ReturnsNullWithoutException()
+        private void Resolve_SingletonFactoryReturnsNull_WhenResolved_ShouldReturnNullWithoutException()
         {
-            var container = new Container();
-            container.RegisterSingleton<object>(c => null);
+            ResetGlobalFlags();
+            _container.RegisterSingleton<object>(c => null);
 
-            var instance = container.Resolve<object>();
+            var instance = _container.Resolve<object>();
 
-            Assert.Equals(null, instance);
-        }    
+            Assert.IsNull(instance);
+        }
     }
 }

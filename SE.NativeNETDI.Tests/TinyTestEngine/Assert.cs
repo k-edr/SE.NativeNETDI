@@ -18,7 +18,7 @@ namespace IngameScript
             }
         }
 
-        public static void Throws<T>(T expected, Action action, string message = "") where T : Exception
+        public static void Throws<T>(Action action, string message = "") where T : Exception
         {
             try
             {

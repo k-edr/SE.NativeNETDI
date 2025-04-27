@@ -7,13 +7,14 @@ namespace IngameScript
 {
     //TODO: Move this to a separate project. Change the reporting system. Make it includable.
     //Rewrite it to be more generic and normal. Add BeforeStart, WhenEnd methods. TestClass.Setup() do I really need it?
+    //Issue: Reversive resolving of dependencies. You may be gap if you have a cross resolving dependencies. I have no idea how to fix without reflection
     class TinyTestsEngine
     {
-        private List<BaseTestClass> _testClasses = new List<BaseTestClass>();
+        private readonly List<BaseTestClass> _testClasses = new List<BaseTestClass>();
 
         private StringBuilder _report = new StringBuilder();
 
-        private Action<string> _debugEcho = null;
+        private readonly Action<string> _debugEcho = null;
 
         public TinyTestsEngine()
         {
@@ -37,7 +38,7 @@ namespace IngameScript
         public IEnumerable<bool> Run()
         {
             int passed = 0;
-            int count = _testClasses.Sum(x=>x.Tests.Length);
+            int count = _testClasses.Sum(x => x.Tests.Length);
 
             _report.AppendLine("==============================");
             _report.AppendLine($"Testing started at {DateTime.Now}");
@@ -50,10 +51,7 @@ namespace IngameScript
                         _report.AppendLine("------------------------------");
                         _report.AppendLine($"Running: {test.Method.Name}");
 
-                        if (_debugEcho != null)
-                        {
-                            _debugEcho($"Running: {test.Method.Name}");
-                        }
+                        _debugEcho?.Invoke($"Running: {test.Method.Name}");
 
                         testClass.Setup();
                         test.Invoke();

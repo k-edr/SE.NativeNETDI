@@ -6,9 +6,9 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        private TinyTestsEngine _engine;
+        private readonly TinyTestsEngine _engine;
 
-        private IEnumerator<bool> _testEnumerator;
+        private readonly IEnumerator<bool> _testEnumerator;
 
         public Program()
         {
