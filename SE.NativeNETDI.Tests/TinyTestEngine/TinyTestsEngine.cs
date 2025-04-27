@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IngameScript
@@ -36,6 +37,7 @@ namespace IngameScript
         public IEnumerable<bool> Run()
         {
             int passed = 0;
+            int count = _testClasses.Sum(x=>x.Tests.Length);
 
             _report.AppendLine("==============================");
             _report.AppendLine($"Testing started at {DateTime.Now}");
@@ -68,9 +70,11 @@ namespace IngameScript
                     yield return false;
                 }
             }
+            _report.AppendLine("------------------------------");
+
             _report.AppendLine($"Testing finished at {DateTime.Now}");
 
-            _report = new StringBuilder($"Testing result: {passed}/{_testClasses.Count} Passed. Details:\n{_report}");
+            _report = new StringBuilder($"Testing result: {passed}/{count} Passed. Details:\n{_report}");
             _report.AppendLine("==============================");
 
             yield return true;
