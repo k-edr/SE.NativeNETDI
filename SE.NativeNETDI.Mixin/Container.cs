@@ -33,6 +33,11 @@ namespace IngameScript
             _singletonTypes.Remove(type);
         }
 
+        public void Resolve<TService>(TService service)
+        {
+            service = Resolve<TService>();
+        }
+
         public TService Resolve<TService>()
         {
             var type = typeof(TService);
