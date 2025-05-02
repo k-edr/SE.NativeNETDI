@@ -21,9 +21,7 @@ using VRageMath;
 namespace IngameScript
 {
     partial class Program : MyGridProgram
-    {
-        private readonly Container _container = new Container();
-
+    {       
         private readonly IGridInfo _gridInfo;
 
         public Program()
