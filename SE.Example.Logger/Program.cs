@@ -81,21 +81,11 @@ namespace IngameScript
         public EchoLogger(Action<string> echo)
         {
             _echo = echo;
-        }
-
-        public void Log(string message)
-        {
-            _echo(message);
-        }
+        }      
 
         public void LogLine(string message)
         {
             _echo(message + Environment.NewLine);
-        }
-
-        public void Clear()
-        {
-            _echo(string.Empty);
-        }
+        }      
     }
 }

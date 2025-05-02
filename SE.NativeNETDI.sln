@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SE.NativeNETDI.Tests", "SE.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SE.DILogger", "SE.DILogger\SE.DILogger.csproj", "{E655C395-F37D-4B76-A71C-9D98BE9CF13D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SE.Example.Logger", "SE.Example.Logger\SE.Example.Logger.csproj", "{5AF5F396-7515-1184-9407-B4C3FAF1DB55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,23 +20,23 @@ Global
 		{36BB8C8A-B4E5-4E09-AF82-51045ED26D42}.Debug|x64.Build.0 = Debug|x64
 		{36BB8C8A-B4E5-4E09-AF82-51045ED26D42}.Release|x64.ActiveCfg = Release|x64
 		{36BB8C8A-B4E5-4E09-AF82-51045ED26D42}.Release|x64.Build.0 = Release|x64
-		{E655C395-F37D-4B76-A71C-9D98BE9CF13D}.Debug|x64.ActiveCfg = Debug|x64
-		{E655C395-F37D-4B76-A71C-9D98BE9CF13D}.Debug|x64.Build.0 = Debug|x64
-		{E655C395-F37D-4B76-A71C-9D98BE9CF13D}.Release|x64.ActiveCfg = Release|x64
-		{E655C395-F37D-4B76-A71C-9D98BE9CF13D}.Release|x64.Build.0 = Release|x64
+		{5AF5F396-7515-1184-9407-B4C3FAF1DB55}.Debug|x64.ActiveCfg = Debug|x64
+		{5AF5F396-7515-1184-9407-B4C3FAF1DB55}.Debug|x64.Build.0 = Debug|x64
+		{5AF5F396-7515-1184-9407-B4C3FAF1DB55}.Release|x64.ActiveCfg = Release|x64
+		{5AF5F396-7515-1184-9407-B4C3FAF1DB55}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{E655C395-F37D-4B76-A71C-9D98BE9CF13D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{5AF5F396-7515-1184-9407-B4C3FAF1DB55} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AE903099-CEC4-426F-912A-FFC4BF024BE0}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		SE.NativeNETDI.Mixin\SE.NativeNETDI.Mixin.projitems*{36bb8c8a-b4e5-4e09-af82-51045ed26d42}*SharedItemsImports = 5
+		SE.NativeNETDI.Mixin\SE.NativeNETDI.Mixin.projitems*{5af5f396-7515-1184-9407-b4c3faf1db55}*SharedItemsImports = 5
 		SE.NativeNETDI.Mixin\SE.NativeNETDI.Mixin.projitems*{8a3cdcc5-4b55-4d87-a415-698a0e1ff06f}*SharedItemsImports = 13
-		SE.NativeNETDI.Mixin\SE.NativeNETDI.Mixin.projitems*{e655c395-f37d-4b76-a71c-9d98be9cf13d}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
